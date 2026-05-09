@@ -1,21 +1,22 @@
 import { Link } from 'react-router-dom';
 
 import Heatmap from '../components/Heatmap.jsx';
+import { HeatmapSkeleton } from '../components/Skeleton.jsx';
 import useHeatmap from '../hooks/useHeatmap.js';
 
 export default function HomePage() {
   const { pharmacies, loading, error } = useHeatmap();
 
+  const stats = {
+    confirmed: pharmacies.filter((p) => p.classification === 'confirmed').length,
+    suspicious: pharmacies.filter((p) => p.classification === 'suspicious').length,
+    watch: pharmacies.filter((p) => p.classification === 'watch').length,
+    totalReports: pharmacies.reduce((sum, p) => sum + (p.report_count || 0), 0),
+  };
+
   return (
-    <div className="space-y-6">
-      <section className="space-y-2">
-        <h1 className="text-3xl">Pakistan&rsquo;s pharmacy fraud heatmap</h1>
-        <p className="max-w-3xl text-sm text-slate-600">
-          Every dot is a pharmacy with verified community reports of overcharging in the last
-          30 days. Click a marker for incident details. New reports update the map in real
-          time via Firebase.
-        </p>
-      </section>
+    <div className="space-y-8">
+      <Hero stats={stats} />
 
       {error && (
         <div className="card border-l-4 border-red-500 text-sm text-red-700">
@@ -23,25 +24,57 @@ export default function HomePage() {
         </div>
       )}
 
-      {loading ? (
-        <div className="card text-sm text-slate-500">Loading heatmap…</div>
-      ) : (
-        <Heatmap pharmacies={pharmacies} />
-      )}
-
-      <section className="card">
-        <h3 className="text-base">Got overcharged?</h3>
-        <p className="mt-1 text-sm text-slate-600">
-          The PharmaWatch agent will verify the price against DRAP, find cheaper generic
-          alternatives, surface any prior violations on the pharmacy, and prepare a formal
-          complaint letter. Anonymous by design.
-        </p>
-        <Link to="/investigate" className="btn-primary mt-3">
-          Investigate a complaint
-        </Link>
-      </section>
+      {loading ? <HeatmapSkeleton /> : <Heatmap pharmacies={pharmacies} />}
 
       <Legend />
+    </div>
+  );
+}
+
+function Hero({ stats }) {
+  return (
+    <section className="rounded-xl bg-gradient-to-br from-brand-500 via-brand-600 to-brand-700 p-8 text-white shadow-md">
+      <div className="grid gap-6 md:grid-cols-[1.5fr_1fr] md:items-center">
+        <div className="space-y-3">
+          <h1 className="text-3xl font-bold leading-tight text-white sm:text-4xl">
+            Pakistan&rsquo;s pharmacy fraud heatmap.
+          </h1>
+          <p className="max-w-prose text-sm text-brand-50/90 sm:text-base">
+            Every dot is a pharmacy with verified community reports of overcharging in the
+            last 30 days. The agentic AI cross-checks every claim against DRAP&rsquo;s
+            registered Maximum Retail Prices and surfaces prior enforcement actions —
+            anonymous by design.
+          </p>
+          <div className="flex flex-wrap gap-2 pt-1">
+            <Link to="/investigate" className="btn bg-white text-brand-600 hover:bg-brand-50">
+              I was overcharged →
+            </Link>
+            <a
+              href="https://www.drap.gov.pk/medicine-prices"
+              target="_blank"
+              rel="noreferrer"
+              className="btn border border-white/40 text-white hover:bg-white/10"
+            >
+              View DRAP MRP register
+            </a>
+          </div>
+        </div>
+        <dl className="grid grid-cols-2 gap-3">
+          <Stat label="Confirmed" value={stats.confirmed} colorClass="bg-severity-confirmed" />
+          <Stat label="Suspicious" value={stats.suspicious} colorClass="bg-severity-suspicious" />
+          <Stat label="Watchlist" value={stats.watch} colorClass="bg-severity-watch text-slate-900" />
+          <Stat label="Total reports (30d)" value={stats.totalReports} colorClass="bg-white/15" />
+        </dl>
+      </div>
+    </section>
+  );
+}
+
+function Stat({ label, value, colorClass }) {
+  return (
+    <div className={`rounded-lg ${colorClass} px-4 py-3`}>
+      <dd className="text-2xl font-bold leading-none">{value}</dd>
+      <dt className="mt-1 text-xs uppercase tracking-wide opacity-90">{label}</dt>
     </div>
   );
 }

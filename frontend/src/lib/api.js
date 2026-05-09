@@ -3,6 +3,12 @@
 
 const BASE = import.meta.env.VITE_API_BASE_URL || '';
 
+export async function fetchHealth() {
+  const res = await fetch(`${BASE}/health`);
+  if (!res.ok) throw new Error(`health failed: ${res.status}`);
+  return res.json();
+}
+
 export async function fetchHeatmap() {
   const res = await fetch(`${BASE}/reports/heatmap`);
   if (!res.ok) throw new Error(`heatmap failed: ${res.status}`);
@@ -36,7 +42,10 @@ export async function* streamInvestigation(userInput) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ user_input: userInput }),
   });
-  if (!res.ok) throw new Error(`investigate failed: ${res.status}`);
+  if (!res.ok) {
+    const body = await res.text().catch(() => '');
+    throw new Error(`investigate failed (${res.status}): ${body || res.statusText}`);
+  }
 
   const reader = res.body.getReader();
   const decoder = new TextDecoder();

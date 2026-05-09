@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
 import { downloadBlob, downloadComplaintPdf, downloadDossierPdf } from '../lib/api.js';
-import { pct, rupees, SEVERITY_BG, SEVERITY_LABEL, shortDate } from '../lib/format.js';
+import { rupees, SEVERITY_BG, SEVERITY_LABEL, shortDate } from '../lib/format.js';
 
 // Walk the trace events, plucking each tool_result into a structured snapshot
 // the report can render against.

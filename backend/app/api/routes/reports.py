@@ -1,9 +1,13 @@
 from fastapi import APIRouter
 
+from app.data.firebase import reports_repo
+from app.services.pattern_detection import aggregate_for_heatmap
+
 router = APIRouter()
 
 
 @router.get("/heatmap")
-async def heatmap():
-    # TODO(day 1 evening): aggregate Firestore reports per pharmacy with 30-day window.
-    raise NotImplementedError("Heatmap aggregation not wired yet — see Day 1 of PROJECT_PLAN.md")
+async def heatmap() -> dict:
+    """Initial heatmap load. The frontend subscribes to Firestore directly for live updates."""
+    reports = reports_repo.all_recent_reports(days=30)
+    return {"pharmacies": aggregate_for_heatmap(reports)}

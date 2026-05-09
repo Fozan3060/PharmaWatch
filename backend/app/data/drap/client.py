@@ -9,7 +9,9 @@ _SCHEMA_PATH = Path(__file__).parent / "schema.sql"
 
 
 def _connect(db_path: Path) -> sqlite3.Connection:
-    conn = sqlite3.connect(db_path, detect_types=sqlite3.PARSE_DECLTYPES)
+    # No detect_types — we store ISO-8601 timestamps as strings and avoid the
+    # deprecated default sqlite3 datetime converters (Python 3.12+).
+    conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     return conn

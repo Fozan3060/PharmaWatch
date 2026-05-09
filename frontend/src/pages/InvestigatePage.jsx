@@ -1,10 +1,13 @@
 import AgentTracePanel from '../components/AgentTracePanel.jsx';
 import InvestigationReport from '../components/InvestigationReport.jsx';
 import ReportForm from '../components/ReportForm.jsx';
+import { ReportSkeleton } from '../components/Skeleton.jsx';
 import useAgentStream from '../hooks/useAgentStream.js';
 
 export default function InvestigatePage() {
   const { events, status, errorMessage, investigate, reset } = useAgentStream();
+  const isStreaming = status === 'streaming';
+  const hasNoFindingsYet = events.length === 0 || !events.some((e) => e.event === 'tool_result');
 
   return (
     <div className="space-y-6">
@@ -17,12 +20,15 @@ export default function InvestigatePage() {
         </p>
       </section>
 
-      <ReportForm onSubmit={investigate} disabled={status === 'streaming'} />
+      <ReportForm onSubmit={investigate} disabled={isStreaming} />
 
       {status === 'error' && (
         <div className="card border-l-4 border-red-500 text-sm text-red-700">
-          {errorMessage || 'Something went wrong.'}
-          <button onClick={reset} className="ml-3 text-xs underline">
+          <div className="font-medium">Agent failed.</div>
+          <div className="mt-1 text-xs">
+            {errorMessage || 'Something went wrong — check that GEMINI_API_KEY is set in backend/.env.'}
+          </div>
+          <button onClick={reset} className="mt-2 text-xs underline">
             try again
           </button>
         </div>
@@ -30,7 +36,11 @@ export default function InvestigatePage() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
         <div className="space-y-6">
-          <InvestigationReport events={events} />
+          {isStreaming && hasNoFindingsYet ? (
+            <ReportSkeleton />
+          ) : (
+            <InvestigationReport events={events} />
+          )}
         </div>
         <aside>
           <AgentTracePanel events={events} status={status} />

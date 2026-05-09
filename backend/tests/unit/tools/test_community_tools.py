@@ -1,16 +1,4 @@
-import pytest
-
 from app.agent.tools import all_tools, dispatch
-from app.data.firebase.client import reset_firestore, set_firestore_for_testing
-from tests.fakes.firestore import FakeFirestore
-
-
-@pytest.fixture(autouse=True)
-def fake_firestore():
-    fake = FakeFirestore()
-    set_firestore_for_testing(fake)
-    yield fake
-    reset_firestore()
 
 
 def test_community_tools_registered():

@@ -1,4 +1,4 @@
-"""Pytest fixtures: provide an isolated, seeded SQLite DB per test session."""
+"""Shared pytest fixtures: isolated SQLite + in-memory Firestore."""
 
 from __future__ import annotations
 
@@ -16,9 +16,7 @@ def _isolated_drap_db():
     db_path = Path(tmpdir) / "drap.sqlite"
     os.environ["DRAP_SQLITE_PATH"] = str(db_path)
 
-    # Reset cached settings so the override is picked up
     from app.config import get_settings
-
     get_settings.cache_clear()
 
     from app.data.drap.client import init_schema
@@ -30,3 +28,15 @@ def _isolated_drap_db():
     seed_enforcement()
 
     yield db_path
+
+
+@pytest.fixture(autouse=True)
+def fake_firestore():
+    """Fresh in-memory Firestore for every test so writes don't bleed between cases."""
+    from app.data.firebase.client import reset_firestore, set_firestore_for_testing
+    from tests.fakes.firestore import FakeFirestore
+
+    fake = FakeFirestore()
+    set_firestore_for_testing(fake)
+    yield fake
+    reset_firestore()

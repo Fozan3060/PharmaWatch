@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment / secrets
+.env
+.env.local
+.env.*.local
+*.serviceaccount.json
+firebase-credentials.json
+
+# Local data (keep seeds, ignore generated DB)
+backend/data_store/*.sqlite
+backend/data_store/*.sqlite-journal
+backend/data_store/*.sqlite-wal
+backend/data_store/*.sqlite-shm
+!backend/data_store/seed/
+
+# Node
+node_modules/
+.pnp/
+.pnp.js
+.yarn/
+
+# Build outputs
+frontend/dist/
+frontend/build/
+.parcel-cache/
+.next/
+.turbo/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# Testing
+coverage/
+.coverage
+htmlcov/

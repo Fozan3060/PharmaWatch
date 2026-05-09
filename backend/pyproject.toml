@@ -20,8 +20,8 @@ dependencies = [
     "pydantic-settings>=2.6.0",
     "python-dotenv>=1.0.1",
 
-    # LLM — Gemini
-    "google-generativeai>=0.8.3",
+    # LLM — Gemini (the new SDK; google-generativeai is deprecated)
+    "google-genai>=1.0.0",
 
     # Data
     "firebase-admin>=6.5.0",

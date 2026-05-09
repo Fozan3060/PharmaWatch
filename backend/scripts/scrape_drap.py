@@ -21,7 +21,7 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 # Make the app package importable when running as a script.
@@ -86,7 +86,7 @@ def record_scrape(table_name: str, row_count: int, source_url: str) -> None:
                 row_count       = excluded.row_count,
                 source_url      = excluded.source_url
             """,
-            (table_name, datetime.now(timezone.utc).isoformat(), row_count, source_url),
+            (table_name, datetime.now(UTC).isoformat(), row_count, source_url),
         )
         conn.commit()
 

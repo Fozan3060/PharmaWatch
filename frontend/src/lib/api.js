@@ -15,6 +15,19 @@ export async function fetchHeatmap() {
   return res.json();
 }
 
+export async function submitCommunityReport(report) {
+  const res = await fetch(`${BASE}/reports/submit`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(report),
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => '');
+    throw new Error(`submit failed (${res.status}): ${body || res.statusText}`);
+  }
+  return res.json();
+}
+
 export async function downloadComplaintPdf(complaint) {
   const res = await fetch(`${BASE}/complaint/pdf`, {
     method: 'POST',

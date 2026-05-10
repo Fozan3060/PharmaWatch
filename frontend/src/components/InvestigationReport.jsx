@@ -2,9 +2,12 @@ import { useMemo } from 'react';
 
 import { downloadBlob, downloadComplaintPdf, downloadDossierPdf } from '../lib/api.js';
 import { rupees, SEVERITY_BG, SEVERITY_LABEL, shortDate } from '../lib/format.js';
+import SubmitToCommunity from './SubmitToCommunity.jsx';
+import VerdictCard from './VerdictCard.jsx';
 
-// Walk the trace events, plucking each tool_result into a structured snapshot
-// the report can render against.
+// Walk the trace events, plucking each tool_call/tool_result into a structured
+// snapshot the report can render against. Tool *call* args matter as much as
+// results — generate_complaint_letter's args carry the verdict numbers.
 function extractFindings(events) {
   const findings = {
     priceLookup: null,
@@ -14,24 +17,50 @@ function extractFindings(events) {
     community: null,
     complaintLetter: null,
     dossier: null,
+    incident: null,         // verdict + submission source of truth
     finalText: null,
-    overcharge: null,
   };
+
   for (const evt of events) {
-    if (evt.event === 'tool_result') {
+    if (evt.event === 'tool_call') {
+      // generate_complaint_letter args are the structured verdict (charged
+      // price + MRP + pharmacy details). We capture them on the call event so
+      // the verdict card can render before the result lands.
+      if (evt.data?.name === 'generate_complaint_letter') {
+        findings.incident = { ...evt.data.args };
+      }
+    } else if (evt.event === 'tool_result') {
       const { name, result } = evt.data;
       if (name === 'drap_price_lookup' && result?.found) findings.priceLookup = result;
       else if (name === 'generic_alternatives') findings.alternatives = result;
       else if (name === 'spurious_alert_check') findings.spurious = result;
       else if (name === 'drap_enforcement_lookup' && result?.found) findings.enforcement = result;
       else if (name === 'get_pharmacy_reports') findings.community = result;
-      else if (name === 'log_community_report') findings.community = { ...findings.community, lastLog: result };
       else if (name === 'generate_complaint_letter') findings.complaintLetter = result;
       else if (name === 'generate_collective_dossier') findings.dossier = result;
     } else if (evt.event === 'final') {
       findings.finalText = evt.data?.text;
     }
   }
+
+  // If the agent never called generate_complaint_letter (no overcharge), build
+  // a green-verdict incident from the price lookup so VerdictCard still renders.
+  if (!findings.incident && findings.priceLookup) {
+    findings.incident = {
+      medicine_name: findings.priceLookup.brand_name,
+      strength: findings.priceLookup.strength,
+      official_mrp_pkr: findings.priceLookup.mrp_pkr,
+      charged_price_pkr: null,  // no overcharge known
+    };
+  }
+
+  // Compute overcharge if we have both numbers
+  if (findings.incident?.charged_price_pkr != null && findings.incident?.official_mrp_pkr) {
+    const amt = findings.incident.charged_price_pkr - findings.incident.official_mrp_pkr;
+    findings.incident.overcharge_amt_pkr = Math.round(amt * 100) / 100;
+    findings.incident.overcharge_pct = Math.round((amt / findings.incident.official_mrp_pkr) * 1000) / 10;
+  }
+
   return findings;
 }
 
@@ -46,22 +75,26 @@ export default function InvestigationReport({ events }) {
 
   if (!hasContent) return null;
 
+  const overcharged =
+    findings.incident?.charged_price_pkr != null &&
+    findings.incident?.official_mrp_pkr != null &&
+    findings.incident.charged_price_pkr > findings.incident.official_mrp_pkr;
+
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl">Investigation Report</h2>
+      <VerdictCard incident={findings.incident} />
 
       {findings.spurious?.alert && <SpuriousWarning data={findings.spurious} />}
 
       {findings.priceLookup && (
-        <PriceCard
-          price={findings.priceLookup}
-          alternatives={findings.alternatives}
-        />
+        <PriceCard price={findings.priceLookup} alternatives={findings.alternatives} />
       )}
 
       {findings.enforcement && <EnforcementCard data={findings.enforcement} />}
 
       {findings.community && <CommunityCard data={findings.community} />}
+
+      {overcharged && <SubmitToCommunity incident={findings.incident} />}
 
       {(findings.complaintLetter || findings.dossier) && (
         <DownloadActions complaint={findings.complaintLetter} dossier={findings.dossier} />
@@ -193,11 +226,11 @@ function EnforcementCard({ data }) {
 }
 
 function CommunityCard({ data }) {
-  const cls = data.classification || data.lastLog?.classification || 'clean';
-  const count = data.report_count ?? data.lastLog?.pharmacy_total_reports_30d ?? 0;
+  const cls = data.classification || 'clean';
+  const count = data.report_count ?? 0;
   return (
     <div className="card">
-      <h3 className="text-base">Community signal</h3>
+      <h3 className="text-base">Existing community signal (before your submission)</h3>
       <div className="mt-3 flex items-center justify-between">
         <div>
           <div className="text-3xl font-bold text-brand-500">{count}</div>

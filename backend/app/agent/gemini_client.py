@@ -10,7 +10,7 @@ from __future__ import annotations
 from google import genai
 from google.genai import types
 
-from app.agent.system_prompt import SYSTEM_PROMPT
+from app.agent.system_prompt import build_system_prompt
 from app.agent.tools import to_gemini_function_declarations
 from app.config import get_settings
 
@@ -43,7 +43,7 @@ def make_chat():
         for d in to_gemini_function_declarations()
     ]
     config = types.GenerateContentConfig(
-        system_instruction=SYSTEM_PROMPT,
+        system_instruction=build_system_prompt(),  # injects today's date
         tools=[types.Tool(function_declarations=declarations)],
     )
     return client.aio.chats.create(model=settings.gemini_agent_model, config=config)

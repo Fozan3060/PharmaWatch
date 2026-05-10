@@ -8,11 +8,14 @@ imports `app.agent.tools` and gets every tool.
 from __future__ import annotations
 
 import inspect
+import logging
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
 from app.core.exceptions import ToolExecutionError, ToolNotFoundError
+
+log = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -49,6 +52,18 @@ def get_tool(name: str) -> ToolSpec:
 
 async def dispatch(name: str, **kwargs: Any) -> Any:
     spec = get_tool(name)
+    # Gemini occasionally hallucinates extra kwargs that aren't in the schema
+    # (e.g. passing `strength` to spurious_alert_check). Drop them silently
+    # rather than crash — it's better to call the tool with what it accepts.
+    sig = inspect.signature(spec.handler)
+    has_var_kw = any(p.kind == p.VAR_KEYWORD for p in sig.parameters.values())
+    if not has_var_kw:
+        accepted = {p.name for p in sig.parameters.values()
+                    if p.kind in (p.POSITIONAL_OR_KEYWORD, p.KEYWORD_ONLY)}
+        extras = set(kwargs) - accepted
+        if extras:
+            log.warning("dropping unexpected kwargs from %s: %s", name, sorted(extras))
+            kwargs = {k: v for k, v in kwargs.items() if k in accepted}
     try:
         result = spec.handler(**kwargs)
         if inspect.isawaitable(result):

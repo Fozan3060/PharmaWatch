@@ -54,17 +54,19 @@ async def test_complaint_letter_named_complainant():
 
 
 async def test_collective_dossier_aggregates_and_verifies():
-    base = {"pharmacy_name": "City Pharmacy", "area": "Saddar", "city": "Karachi"}
-    # 4 community reports, all verified-overcharge against the seeded DRAP data
-    await dispatch("log_community_report", **base, medicine="Ceftum",
-                   official_mrp=640, charged_price=1200)
-    await dispatch("log_community_report", **base, medicine="Augmentin",
-                   official_mrp=1200, charged_price=2400)
-    await dispatch("log_community_report", **base, medicine="Brufen",
-                   official_mrp=80, charged_price=180)
+    # Seed reports directly via the repo (the agent no longer has a
+    # log_community_report tool — submissions go through POST /reports/submit).
+    from app.data.firebase import reports_repo
+    from app.normalization.pharmacy_names import make_pharmacy_id
+
+    pid = make_pharmacy_id("City Pharmacy", "Saddar", "Karachi")
+    base = {"pharmacyId": pid, "pharmacyName": "City Pharmacy",
+            "area": "Saddar", "city": "Karachi"}
+    reports_repo.add_report({**base, "medicine": "Ceftum", "officialMRP": 640, "chargedPrice": 1200})
+    reports_repo.add_report({**base, "medicine": "Augmentin", "officialMRP": 1200, "chargedPrice": 2400})
+    reports_repo.add_report({**base, "medicine": "Brufen", "officialMRP": 80, "chargedPrice": 180})
     # One report whose claimed overcharge isn't actually above current MRP -> not verified
-    await dispatch("log_community_report", **base, medicine="Ceftum",
-                   official_mrp=640, charged_price=600)
+    reports_repo.add_report({**base, "medicine": "Ceftum", "officialMRP": 640, "chargedPrice": 600})
 
     dossier = await dispatch(
         "generate_collective_dossier",

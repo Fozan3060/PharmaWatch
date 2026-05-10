@@ -17,12 +17,17 @@ build/
 venv/
 env/
 
-# Environment / secrets
+# Environment / secrets — never commit these
 .env
 .env.local
 .env.*.local
 *.serviceaccount.json
 firebase-credentials.json
+# Catch any Firebase Admin SDK key the user downloads with the default name
+*-firebase-adminsdk-*.json
+# Catch generic GCP service account key downloads
+*-service-account-*.json
+serviceAccountKey.json
 
 # Local data (keep seeds, ignore generated DB)
 backend/data_store/*.sqlite

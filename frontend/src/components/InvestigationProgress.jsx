@@ -36,6 +36,33 @@ const ROW_CLASS = {
 
 export default function InvestigationProgress({ events, status }) {
   const isStreaming = status === 'streaming';
+  const isDone = status === 'done';
+  const anyToolFired = events.some((e) => e.event === 'tool_call');
+  const finalText = events.find((e) => e.event === 'final')?.data?.text || '';
+
+  // Edge case: agent finished without calling any tool. Usually because the
+  // input was too vague. Surface the agent's text as the explanation instead
+  // of a misleading "Investigation complete" with empty steps.
+  if (isDone && !anyToolFired) {
+    return (
+      <div className="card border-l-4 border-yellow-400">
+        <div className="mb-2 flex items-center gap-3">
+          <span className="text-yellow-500">⚠</span>
+          <h3 className="text-base">The agent needs more info</h3>
+        </div>
+        {finalText ? (
+          <div className="whitespace-pre-wrap text-sm text-slate-700">{finalText}</div>
+        ) : (
+          <p className="text-sm text-slate-700">
+            Try rephrasing with the medicine name, the price you were charged, and the
+            pharmacy (with city). For example:{' '}
+            <em>&ldquo;I was charged Rs. 1,200 for Ceftum 500mg at City Pharmacy, Saddar,
+            Karachi.&rdquo;</em>
+          </p>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="card border-l-4 border-brand-500">

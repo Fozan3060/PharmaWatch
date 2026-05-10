@@ -11,6 +11,8 @@ export default defineConfig({
       '/complaint': 'http://localhost:8000',
       '/dossier': 'http://localhost:8000',
       '/health': 'http://localhost:8000',
+      '/medicines': 'http://localhost:8000',
+      '/pharmacies': 'http://localhost:8000',
     },
   },
 });

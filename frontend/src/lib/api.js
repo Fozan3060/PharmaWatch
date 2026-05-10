@@ -9,6 +9,22 @@ export async function fetchHealth() {
   return res.json();
 }
 
+export async function searchMedicines(q, limit = 10) {
+  const res = await fetch(`${BASE}/medicines/search?q=${encodeURIComponent(q)}&limit=${limit}`);
+  if (!res.ok) throw new Error(`medicines/search failed: ${res.status}`);
+  const body = await res.json();
+  return body.results;
+}
+
+export async function searchPharmacies(q, city, limit = 10) {
+  const params = new URLSearchParams({ q, limit: String(limit) });
+  if (city) params.set('city', city);
+  const res = await fetch(`${BASE}/pharmacies/known?${params.toString()}`);
+  if (!res.ok) throw new Error(`pharmacies/known failed: ${res.status}`);
+  const body = await res.json();
+  return body.results;
+}
+
 export async function fetchHeatmap() {
   const res = await fetch(`${BASE}/reports/heatmap`);
   if (!res.ok) throw new Error(`heatmap failed: ${res.status}`);

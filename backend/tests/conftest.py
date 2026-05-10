@@ -20,12 +20,18 @@ def _isolated_drap_db():
     get_settings.cache_clear()
 
     from app.data.drap.client import init_schema
-    from scripts.seed_drap import seed_enforcement, seed_medicines, seed_spurious_alerts
+    from scripts.seed_drap import (
+        seed_enforcement,
+        seed_known_pharmacies,
+        seed_medicines,
+        seed_spurious_alerts,
+    )
 
     init_schema(db_path)
     seed_medicines()
     seed_spurious_alerts()
     seed_enforcement()
+    seed_known_pharmacies()
 
     yield db_path
 

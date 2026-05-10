@@ -290,10 +290,11 @@ function Field({ label, hint, children }) {
 }
 
 function buildAgentInput({ medicine, chargedPrice, pharmacyName, area, city, date }) {
+  // Deliberately omit the MRP — the agent must look it up itself via
+  // drap_price_lookup (DRAP data is canonical, never trust the form's claim).
   const areaPart = area ? `, ${area}` : '';
   return (
     `I was charged Rs. ${chargedPrice} for ${medicine.brand_name} ${medicine.strength} ` +
-    `(DRAP registration ${medicine.reg_number}, official MRP Rs. ${medicine.mrp_pkr}) ` +
     `at ${pharmacyName}${areaPart}, ${city} on ${date}.`
   );
 }

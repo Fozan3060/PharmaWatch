@@ -40,26 +40,34 @@ export default function InvestigationProgress({ events, status }) {
   const anyToolFired = events.some((e) => e.event === 'tool_call');
   const finalText = events.find((e) => e.event === 'final')?.data?.text || '';
 
-  // Edge case: agent finished without calling any tool. Usually because the
-  // input was too vague. Surface the agent's text as the explanation instead
-  // of a misleading "Investigation complete" with empty steps.
+  // Edge case: agent finished without calling any tool.
+  // Two sub-cases: (a) it returned a substantive text reply (e.g. "your price
+  // is within MRP, no investigation needed") — surface that text as the
+  // answer; (b) it returned nothing useful — show the "needs more info" hint.
   if (isDone && !anyToolFired) {
+    if (finalText && finalText.length > 30) {
+      return (
+        <div className="card border-l-4 border-blue-400">
+          <div className="mb-2 flex items-center gap-3">
+            <span className="text-blue-500">ℹ</span>
+            <h3 className="text-base">Agent response</h3>
+          </div>
+          <div className="whitespace-pre-wrap text-sm text-slate-700">{finalText}</div>
+        </div>
+      );
+    }
     return (
       <div className="card border-l-4 border-yellow-400">
         <div className="mb-2 flex items-center gap-3">
           <span className="text-yellow-500">⚠</span>
           <h3 className="text-base">The agent needs more info</h3>
         </div>
-        {finalText ? (
-          <div className="whitespace-pre-wrap text-sm text-slate-700">{finalText}</div>
-        ) : (
-          <p className="text-sm text-slate-700">
-            Try rephrasing with the medicine name, the price you were charged, and the
-            pharmacy (with city). For example:{' '}
-            <em>&ldquo;I was charged Rs. 1,200 for Ceftum 500mg at City Pharmacy, Saddar,
-            Karachi.&rdquo;</em>
-          </p>
-        )}
+        <p className="text-sm text-slate-700">
+          Try rephrasing with the medicine name, the price you were charged, and the
+          pharmacy (with city). For example:{' '}
+          <em>&ldquo;I was charged Rs. 1,200 for Ceftum 500mg at City Pharmacy, Saddar,
+          Karachi.&rdquo;</em>
+        </p>
       </div>
     );
   }

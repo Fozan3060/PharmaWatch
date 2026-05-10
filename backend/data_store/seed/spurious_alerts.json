@@ -1,0 +1,56 @@
+[
+  {
+    "medicine_name": "Augmentin 625",
+    "batch_number": "AB-2024-1284",
+    "manufacturer": "Counterfeit — claimed GSK",
+    "reason": "counterfeit",
+    "alert_date": "2024-03-18",
+    "drap_notice_ref": "DRAP/SPM/2024/041",
+    "source_url": "https://www.drap.gov.pk/spurious-medicines/2024-041"
+  },
+  {
+    "medicine_name": "Risek 20",
+    "batch_number": "RK-3344",
+    "manufacturer": "Mislabeled batch — Getz Pharma origin disputed",
+    "reason": "mislabeled",
+    "alert_date": "2024-10-05",
+    "drap_notice_ref": "DRAP/SPM/2024/118",
+    "source_url": "https://www.drap.gov.pk/spurious-medicines/2024-118"
+  },
+  {
+    "medicine_name": "Ceftum 500mg",
+    "batch_number": "CT-9921",
+    "manufacturer": "Substandard — failed dissolution test",
+    "reason": "substandard",
+    "alert_date": "2024-08-22",
+    "drap_notice_ref": "DRAP/SPM/2024/092",
+    "source_url": "https://www.drap.gov.pk/spurious-medicines/2024-092"
+  },
+  {
+    "medicine_name": "Brufen 400",
+    "batch_number": "BR-2025-0117",
+    "manufacturer": "Counterfeit — claimed Abbott",
+    "reason": "counterfeit",
+    "alert_date": "2025-01-15",
+    "drap_notice_ref": "DRAP/SPM/2025/008",
+    "source_url": "https://www.drap.gov.pk/spurious-medicines/2025-008"
+  },
+  {
+    "medicine_name": "Zithromax 500",
+    "batch_number": "ZX-7733",
+    "manufacturer": "Substandard — fails assay",
+    "reason": "substandard",
+    "alert_date": "2025-03-02",
+    "drap_notice_ref": "DRAP/SPM/2025/021",
+    "source_url": "https://www.drap.gov.pk/spurious-medicines/2025-021"
+  },
+  {
+    "medicine_name": "Glucophage 500",
+    "batch_number": "GP-4412",
+    "manufacturer": "Unregistered import — no DRAP authorization",
+    "reason": "unregistered",
+    "alert_date": "2025-04-11",
+    "drap_notice_ref": "DRAP/SPM/2025/034",
+    "source_url": "https://www.drap.gov.pk/spurious-medicines/2025-034"
+  }
+]

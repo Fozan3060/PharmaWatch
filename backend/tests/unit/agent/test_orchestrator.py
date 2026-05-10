@@ -62,8 +62,11 @@ async def test_tool_error_is_streamed_and_passed_back_to_model():
     types = [e.type for e in events]
     assert "tool_error" in types
     assert events[-1].type == "final"
-    # The error response must be sent back to the model so it can recover
-    assert chat.sent[1][0]["function_response"]["response"]["error"]
+    # The error response must be sent back to the model so it can recover.
+    # Sent as a typed Part so the new google-genai SDK accepts it.
+    sent_part = chat.sent[1][0]
+    assert sent_part.function_response.name == "drap_price_lookup"
+    assert sent_part.function_response.response["error"]
 
 
 async def test_max_tool_calls_terminates_safely():

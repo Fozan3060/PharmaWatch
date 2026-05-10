@@ -45,18 +45,10 @@ function Hero({ stats }) {
             registered Maximum Retail Prices and surfaces prior enforcement actions —
             anonymous by design.
           </p>
-          <div className="flex flex-wrap gap-2 pt-1">
+          <div className="pt-1">
             <Link to="/investigate" className="btn bg-white text-brand-600 hover:bg-brand-50">
               I was overcharged →
             </Link>
-            <a
-              href="https://www.drap.gov.pk/medicine-prices"
-              target="_blank"
-              rel="noreferrer"
-              className="btn border border-white/40 text-white hover:bg-white/10"
-            >
-              View DRAP MRP register
-            </a>
           </div>
         </div>
         <dl className="grid grid-cols-2 gap-3">

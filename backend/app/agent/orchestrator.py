@@ -13,6 +13,8 @@ from collections.abc import AsyncIterator
 from datetime import UTC, datetime
 from typing import Any
 
+from google.genai import types
+
 from app.agent.gemini_client import make_chat
 from app.agent.tools import dispatch
 from app.agent.trace import TraceEvent
@@ -73,7 +75,7 @@ async def investigate(user_input: str, chat: Any | None = None) -> AsyncIterator
             yield _event(seq, "final", {"text": final_text})
             return
 
-        function_response_payload = []
+        function_response_parts: list[types.Part] = []
         for fc in function_calls:
             args = dict(fc.args) if fc.args else {}
             seq += 1
@@ -82,17 +84,17 @@ async def investigate(user_input: str, chat: Any | None = None) -> AsyncIterator
                 result = await dispatch(fc.name, **args)
                 seq += 1
                 yield _event(seq, "tool_result", {"name": fc.name, "result": _summarize(result)})
-                function_response_payload.append(
-                    {"function_response": {"name": fc.name, "response": {"result": result}}}
+                function_response_parts.append(
+                    types.Part.from_function_response(name=fc.name, response={"result": result})
                 )
             except Exception as exc:
                 seq += 1
                 yield _event(seq, "tool_error", {"name": fc.name, "error": str(exc)})
-                function_response_payload.append(
-                    {"function_response": {"name": fc.name, "response": {"error": str(exc)}}}
+                function_response_parts.append(
+                    types.Part.from_function_response(name=fc.name, response={"error": str(exc)})
                 )
 
-        response = await chat.send_message(function_response_payload)
+        response = await chat.send_message(function_response_parts)
 
     seq += 1
     yield _event(

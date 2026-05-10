@@ -23,14 +23,20 @@ def add_report(record: dict[str, Any]) -> str:
 
 
 def reports_for_pharmacy(pharmacy_id: str, days: int = 30) -> list[dict[str, Any]]:
+    """Single-field query (auto-indexed); the timestamp window is filtered in
+    Python so we don't need a Firestore composite index for (pharmacyId, timestamp).
+    Fine at hackathon scale; revisit with a composite index if a single pharmacy
+    ever holds tens of thousands of reports."""
     db = get_firestore()
     cutoff = datetime.now(UTC) - timedelta(days=days)
-    query = (
-        db.collection(COLLECTION)
-        .where("pharmacyId", "==", pharmacy_id)
-        .where("timestamp", ">=", cutoff)
-    )
-    return [{"id": d.id, **d.to_dict()} for d in query.stream()]
+    query = db.collection(COLLECTION).where("pharmacyId", "==", pharmacy_id)
+    out: list[dict[str, Any]] = []
+    for d in query.stream():
+        data = d.to_dict()
+        ts = data.get("timestamp")
+        if ts is None or ts >= cutoff:
+            out.append({"id": d.id, **data})
+    return out
 
 
 def all_recent_reports(days: int = 30) -> list[dict[str, Any]]:

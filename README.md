@@ -1,5 +1,7 @@
 # PharmaWatch
 
+[![CI](https://github.com/Fozan3060/PharmaWatch/actions/workflows/ci.yml/badge.svg)](https://github.com/Fozan3060/PharmaWatch/actions/workflows/ci.yml)
+
 **Pakistan's first agentic AI consumer-protection system for the pharmaceutical sector.**
 
 A user reports being overcharged at a pharmacy. The agent autonomously plans an investigation, verifies the price against DRAP's official MRP, finds cheaper generic alternatives, cross-checks counterfeit/spurious medicine alerts, **pulls the pharmacy's prior enforcement history with notice references and penalty amounts**, anonymously logs the report to a real-time community heatmap, and generates a pre-filled formal complaint letter to DRAP — all observable as a live tool-call trace.

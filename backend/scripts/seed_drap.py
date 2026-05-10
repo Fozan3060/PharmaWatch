@@ -105,6 +105,21 @@ def seed_enforcement() -> int:
     return len(rows)
 
 
+def seed_known_pharmacies() -> int:
+    rows = _load("known_pharmacies.json")
+    with get_connection() as conn:
+        conn.execute("DELETE FROM known_pharmacies")
+        conn.executemany(
+            """
+            INSERT INTO known_pharmacies (pharmacy_name, area, city)
+            VALUES (:pharmacy_name, :area, :city)
+            """,
+            rows,
+        )
+        conn.commit()
+    return len(rows)
+
+
 def record_scrape(table_name: str, row_count: int) -> None:
     with get_connection() as conn:
         conn.execute(
@@ -135,6 +150,10 @@ def main() -> int:
     n_enf = seed_enforcement()
     record_scrape("local_drap_enforcement", n_enf)
     log.info("local_drap_enforcement: %d rows", n_enf)
+
+    n_known = seed_known_pharmacies()
+    record_scrape("known_pharmacies", n_known)
+    log.info("known_pharmacies: %d rows", n_known)
 
     return 0
 

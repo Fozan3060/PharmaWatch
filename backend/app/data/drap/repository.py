@@ -91,6 +91,89 @@ def find_spurious_alerts(medicine_name: str, batch_number: str | None = None) ->
         return [dict(r) for r in rows]
 
 
+def search_medicines_for_autocomplete(q: str, limit: int = 10) -> list[dict[str, Any]]:
+    """Autocomplete: prefix matches first, then substring. Brand or generic."""
+    if not q or len(q.strip()) < 1:
+        return []
+    needle = q.strip()
+    with get_connection() as conn:
+        rows = conn.execute(
+            """
+            SELECT * FROM medicines
+            WHERE brand_name LIKE '%' || ? || '%' COLLATE NOCASE
+               OR generic_name LIKE '%' || ? || '%' COLLATE NOCASE
+               OR active_ingredient LIKE '%' || ? || '%' COLLATE NOCASE
+            ORDER BY
+              CASE
+                WHEN brand_name LIKE ? || '%' COLLATE NOCASE THEN 0
+                WHEN brand_name LIKE '%' || ? || '%' COLLATE NOCASE THEN 1
+                ELSE 2
+              END,
+              brand_name COLLATE NOCASE
+            LIMIT ?
+            """,
+            (needle, needle, needle, needle, needle, limit),
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def search_pharmacies_for_autocomplete(
+    q: str, city: str | None = None, limit: int = 10
+) -> list[dict[str, Any]]:
+    """Autocomplete pharmacies. Unions two sources:
+       1) local_drap_enforcement (pharmacies with prior violations) — surfaced
+          first with violation_count for the warning badge.
+       2) known_pharmacies (curated chains like Dvago) — surfaced after, with
+          violation_count = 0 so the FE can show a "known chain" badge instead.
+    Dedupes on (lowercase name, lowercase city)."""
+    if not q or len(q.strip()) < 1:
+        return []
+    needle = q.strip()
+
+    # 1) Enforcement matches
+    enf_sql = """
+        SELECT pharmacy_name, area, city, COUNT(*) AS violation_count
+        FROM local_drap_enforcement
+        WHERE pharmacy_name LIKE '%' || ? || '%' COLLATE NOCASE
+    """
+    enf_params: list[Any] = [needle]
+    if city:
+        enf_sql += " AND LOWER(city) = LOWER(?)"
+        enf_params.append(city)
+    enf_sql += """
+        GROUP BY pharmacy_name, area, city
+        ORDER BY violation_count DESC, pharmacy_name COLLATE NOCASE
+        LIMIT ?
+    """
+    enf_params.append(limit)
+
+    # 2) Known-chain matches
+    known_sql = """
+        SELECT pharmacy_name, area, city, 0 AS violation_count
+        FROM known_pharmacies
+        WHERE pharmacy_name LIKE '%' || ? || '%' COLLATE NOCASE
+    """
+    known_params: list[Any] = [needle]
+    if city:
+        known_sql += " AND LOWER(city) = LOWER(?)"
+        known_params.append(city)
+    known_sql += " ORDER BY pharmacy_name COLLATE NOCASE LIMIT ?"
+    known_params.append(limit)
+
+    with get_connection() as conn:
+        enforcement = [dict(r) for r in conn.execute(enf_sql, enf_params).fetchall()]
+        known = [dict(r) for r in conn.execute(known_sql, known_params).fetchall()]
+
+    seen = {(r["pharmacy_name"].lower(), (r.get("city") or "").lower()) for r in enforcement}
+    out = list(enforcement)
+    for k in known:
+        key = (k["pharmacy_name"].lower(), (k.get("city") or "").lower())
+        if key not in seen:
+            out.append(k)
+            seen.add(key)
+    return out[:limit]
+
+
 def find_enforcement_by_pharmacy(
     pharmacy_id: str | None = None,
     pharmacy_name: str | None = None,

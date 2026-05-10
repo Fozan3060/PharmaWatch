@@ -3,7 +3,7 @@ import { useState } from 'react';
 import AgentTracePanel from '../components/AgentTracePanel.jsx';
 import InvestigationProgress from '../components/InvestigationProgress.jsx';
 import InvestigationReport from '../components/InvestigationReport.jsx';
-import ReportForm from '../components/ReportForm.jsx';
+import StructuredReportForm from '../components/StructuredReportForm.jsx';
 import useAgentStream from '../hooks/useAgentStream.js';
 
 export default function InvestigatePage() {
@@ -23,7 +23,7 @@ export default function InvestigatePage() {
         </p>
       </section>
 
-      <ReportForm onSubmit={investigate} disabled={status === 'streaming'} />
+      <StructuredReportForm onSubmit={investigate} disabled={status === 'streaming'} />
 
       {status === 'error' && (
         <div className="card border-l-4 border-red-500">

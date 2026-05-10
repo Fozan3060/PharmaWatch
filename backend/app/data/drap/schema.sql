@@ -107,6 +107,22 @@ CREATE INDEX IF NOT EXISTS idx_enf_severity
 
 
 -- ─────────────────────────────────────────────────────────────────────
+-- known_pharmacies: curated list of legitimate Pakistani pharmacy chains
+-- so autocomplete can suggest real pharmacies that have NO DRAP enforcement
+-- against them (e.g. Dvago, Servaid). Without this, only "bad" pharmacies
+-- with prior violations would appear in suggestions.
+-- ─────────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS known_pharmacies (
+    pharmacy_name       TEXT NOT NULL,
+    area                TEXT,
+    city                TEXT NOT NULL,
+    PRIMARY KEY (pharmacy_name, city, area)
+);
+CREATE INDEX IF NOT EXISTS idx_known_name
+    ON known_pharmacies(pharmacy_name COLLATE NOCASE);
+
+
+-- ─────────────────────────────────────────────────────────────────────
 -- scrape_metadata: track when each table was last refreshed
 -- Surfaced in the UI as "Data current as of YYYY-MM-DD"
 -- ─────────────────────────────────────────────────────────────────────

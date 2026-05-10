@@ -1,0 +1,22 @@
+[
+  {"pharmacy_name": "Dvago",            "city": "Karachi",    "area": null},
+  {"pharmacy_name": "Dvago",            "city": "Lahore",     "area": null},
+  {"pharmacy_name": "Dvago",            "city": "Islamabad",  "area": null},
+  {"pharmacy_name": "Dvago",            "city": "Rawalpindi", "area": null},
+  {"pharmacy_name": "Dvago",            "city": "Faisalabad", "area": null},
+  {"pharmacy_name": "Servaid Pharmacy", "city": "Karachi",    "area": null},
+  {"pharmacy_name": "Servaid Pharmacy", "city": "Lahore",     "area": null},
+  {"pharmacy_name": "Servaid Pharmacy", "city": "Islamabad",  "area": null},
+  {"pharmacy_name": "Clinix",           "city": "Lahore",     "area": null},
+  {"pharmacy_name": "Clinix",           "city": "Karachi",    "area": null},
+  {"pharmacy_name": "D Watson Chemists","city": "Islamabad",  "area": null},
+  {"pharmacy_name": "D Watson Chemists","city": "Karachi",    "area": null},
+  {"pharmacy_name": "Fazaldin Pharmacy","city": "Lahore",     "area": null},
+  {"pharmacy_name": "Cure Pharmacy",    "city": "Karachi",    "area": null},
+  {"pharmacy_name": "Cure Pharmacy",    "city": "Lahore",     "area": null},
+  {"pharmacy_name": "WellCare Pharmacy","city": "Karachi",    "area": null},
+  {"pharmacy_name": "Khurram Pharmacy", "city": "Karachi",    "area": null},
+  {"pharmacy_name": "Shaheen Chemist",  "city": "Karachi",    "area": null},
+  {"pharmacy_name": "Shaheen Chemist",  "city": "Lahore",     "area": null},
+  {"pharmacy_name": "AB Pharmacy",      "city": "Karachi",    "area": null}
+]

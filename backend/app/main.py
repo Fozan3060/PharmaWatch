@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import agent, documents, health, reports
+from app.api.routes import agent, documents, health, lookup, reports
 from app.config import get_settings
 from app.core.logging import configure_logging
 
@@ -36,6 +36,7 @@ def create_app() -> FastAPI:
     app.include_router(agent.router, prefix="/agent", tags=["agent"])
     app.include_router(reports.router, prefix="/reports", tags=["reports"])
     app.include_router(documents.router, tags=["documents"])
+    app.include_router(lookup.router, tags=["lookup"])
 
     return app
 
